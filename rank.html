@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="si" class="dark" data-theme="dark" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="google" content="notranslate">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduRank</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for Student Progress Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root[data-theme="dark"] {
+      --bg-color: #000000;
+      --card-bg: rgba(8, 8, 8, 0.92);
+      --border-color: rgba(255, 255, 255, 0.25);
+      --border-hover: rgba(255, 255, 255, 0.6);
+      --text-main: #ffffff;
+      --text-muted: #a3a3a3;
+      --accent-btn-bg: linear-gradient(135deg, #ffffff 0%, #e5e5e5 50%, #a3a3a3 100%);
+      --accent-btn-text: #000000;
+      --accent-glow: rgba(255, 255, 255, 0.8);
+      --overlay-bg: radial-gradient(circle at center, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.96));
+    }
+
+    :root[data-theme="light"] {
+      --bg-color: #f8fafc;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --border-color: rgba(0, 0, 0, 0.15);
+      --border-hover: rgba(0, 0, 0, 0.4);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --accent-btn-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --accent-btn-text: #ffffff;
+      --accent-glow: rgba(15, 23, 42, 0.4);
+      --overlay-bg: radial-gradient(circle at center, rgba(241, 245, 249, 0.82), rgba(226, 232, 240, 0.96));
+    }
+
+    :root[data-theme="red"] {
+      --bg-color: #0d0203;
+      --card-bg: rgba(20, 5, 7, 0.92);
+      --border-color: rgba(239, 68, 68, 0.4);
+      --border-hover: rgba(239, 68, 68, 0.8);
+      --text-main: #ffffff;
+      --text-muted: #fca5a5;
+      --accent-btn-bg: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      --accent-btn-text: #ffffff;
+      --accent-glow: rgba(239, 68, 68, 0.8);
+      --overlay-bg: radial-gradient(circle at center, rgba(15, 2, 4, 0.85), rgba(0, 0, 0, 0.98));
+    }
+
+    :root[data-theme="blue"] {
+      --bg-color: #020617;
+      --card-bg: rgba(15, 23, 42, 0.92);
+      --border-color: rgba(59, 130, 246, 0.4);
+      --border-hover: rgba(59, 130, 246, 0.8);
+      --text-main: #ffffff;
+      --text-muted: #93c5fd;
+      --accent-btn-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      --accent-btn-text: #ffffff;
+      --accent-glow: rgba(59, 130, 246, 0.8);
+      --overlay-bg: radial-gradient(circle at center, rgba(2, 6, 23, 0.85), rgba(0, 0, 0, 0.98));
+    }
+
+    :root[data-theme="purple"] {
+      --bg-color: #090212;
+      --card-bg: rgba(24, 9, 43, 0.92);
+      --border-color: rgba(168, 85, 247, 0.4);
+      --border-hover: rgba(168, 85, 247, 0.8);
+      --text-main: #ffffff;
+      --text-muted: #d8b4fe;
+      --accent-btn-bg: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+      --accent-btn-text: #ffffff;
+      --accent-glow: rgba(168, 85, 247, 0.8);
+      --overlay-bg: radial-gradient(circle at center, rgba(9, 2, 18, 0.85), rgba(0, 0, 0, 0.98));
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-image: url('bg.jpg'), url('logo.png_2.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      overflow-x: hidden;
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 0;
+      pointer-events: none;
+      transition: background 0.4s ease;
+    }
+
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .glass-card:hover {
+      border-color: var(--border-hover);
+    }
+
+    .glow-white-btn {
+      background: var(--accent-btn-bg);
+      color: var(--accent-btn-text);
+      font-weight: 900;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .glow-white-btn:hover {
+      box-shadow: 0 0 25px var(--accent-glow);
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    .page-entrance {
+      animation: animeEnergyBlast 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes animeEnergyBlast {
+      0% { opacity: 0; transform: scale(0.95) translateY(30px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* White Butterfly / Spark Trail Effect */
+    .butterfly-particle {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle, #ffffff 0%, rgba(255,255,255,0.4) 60%, transparent 100%);
+      box-shadow: 0 0 10px #ffffff, 0 0 20px rgba(255,255,255,0.8);
+      border-radius: 50% 50% 20% 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(1) rotate(0deg);
+      animation: butterflyFly 0.8s ease-out forwards;
+      z-index: 99999;
+    }
+
+    @keyframes butterflyFly {
+      0% {
+        transform: translate(-50%, -50%) scale(0.6) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, -100%) scale(1.8) rotate(45deg);
+        opacity: 0;
+      }
+    }
+
+    .click-ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.8);
+      transform: scale(0);
+      animation: shockwaveRipple 0.6s ease-out;
+      pointer-events: none;
+    }
+
+    @keyframes shockwaveRipple {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    .crown-glow {
+      animation: crownPulse 2s ease-in-out infinite alternate;
+    }
+    @keyframes crownPulse {
+      0% { filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6)); transform: scale(1); }
+      100% { filter: drop-shadow(0 0 15px rgba(251, 191, 36, 1)); transform: scale(1.15); }
+    }
+
+    .side-menu-drawer {
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .stagger-item {
+      opacity: 0;
+      transform: translateY(-25px) scale(0.96);
+      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .stagger-open .stagger-item {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    #wp-stagger-container.stagger-open .stagger-item:nth-child(1),
+    #brand-stagger-container.stagger-open .stagger-item:nth-child(1),
+    #city-dropdown-menu.stagger-open .stagger-item:nth-child(1),
+    #class-dropdown-menu.stagger-open .stagger-item:nth-child(1),
+    #teacher-admin-sub-menu.stagger-open .stagger-item:nth-child(1),
+    #papers-sub-menu.stagger-open .stagger-item:nth-child(1) { transition-delay: 0.08s; }
+
+    #wp-stagger-container.stagger-open .stagger-item:nth-child(2),
+    #brand-stagger-container.stagger-open .stagger-item:nth-child(2),
+    #city-dropdown-menu.stagger-open .stagger-item:nth-child(2),
+    #class-dropdown-menu.stagger-open .stagger-item:nth-child(2),
+    #teacher-admin-sub-menu.stagger-open .stagger-item:nth-child(2),
+    #papers-sub-menu.stagger-open .stagger-item:nth-child(2) { transition-delay: 0.16s; }
+
+    #wp-stagger-container.stagger-open .stagger-item:nth-child(3),
+    #brand-stagger-container.stagger-open .stagger-item:nth-child(3),
+    #city-dropdown-menu.stagger-open .stagger-item:nth-child(3),
+    #class-dropdown-menu.stagger-open .stagger-item:nth-child(3),
+    #papers-sub-menu.stagger-open .stagger-item:nth-child(3) { transition-delay: 0.24s; }
+
+    #side-stagger-container.stagger-open .stagger-item:nth-child(1) { transition-delay: 0.1s; }
+    #side-stagger-container.stagger-open .stagger-item:nth-child(2) { transition-delay: 0.18s; }
+    #side-stagger-container.stagger-open .stagger-item:nth-child(3) { transition-delay: 0.26s; }
+    #side-stagger-container.stagger-open .stagger-item:nth-child(4) { transition-delay: 0.34s; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col relative page-entrance">
+
+  <!-- Background Overlay -->
+  <div class="bg-overlay"></div>
+
+  <!-- Header Navigation -->
+  <header class="border-b border-white/10 bg-black/80 sticky top-0 z-40 backdrop-blur-2xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between relative z-10">
+      
+      <div class="flex items-center space-x-3.5">
+        <div class="relative group cursor-pointer" onclick="openSideMenu(); createRipple(event)" title="Open Menu">
+          <div class="relative w-11 h-11 rounded-2xl bg-black border border-white/40 flex items-center justify-center shadow-xl transform group-hover:scale-105 transition duration-300">
+            <svg class="w-6 h-6 text-white fill-current group-hover:rotate-12 transition transform duration-300" viewBox="0 0 24 24">
+              <path d="M12 3L1 9l11 6l9-4.91V17h2V9L12 3zM5 13.18v4l7 3.82l7-3.82v-4L12 17l-7-3.82z"/>
+            </svg>
+          </div>
+        </div>
+        <div>
+          <h1 class="font-black text-xl leading-tight tracking-wider text-white">EduRank Portal</h1>
+          <p class="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">CYBER PASIYA</p>
+        </div>
+      </div>
+
+      <!-- Theme Switcher -->
+      <div class="relative">
+        <button onclick="toggleThemeDropdown(); createRipple(event)" class="px-3.5 py-2 rounded-2xl bg-neutral-900 border border-white/20 text-white flex items-center gap-2 hover:border-white/50 transition text-xs font-bold shadow-lg">
+          <i class="fa-solid fa-palette text-amber-400"></i>
+          <span class="hidden sm:inline">Theme</span>
+          <i class="fa-solid fa-chevron-down text-[10px] text-neutral-400"></i>
+        </button>
+
+        <div id="theme-dropdown" class="hidden absolute right-0 mt-2 w-44 bg-neutral-950 border border-white/20 rounded-2xl shadow-2xl p-2 z-50 space-y-1">
+          <button onclick="setTheme('dark')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between hover:bg-neutral-800 text-white transition">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-moon text-neutral-300"></i> Dark (Default)</span>
+            <i id="check-dark" class="fa-solid fa-check text-xs text-emerald-400"></i>
+          </button>
+          <button onclick="setTheme('light')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between hover:bg-neutral-800 text-white transition">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-sun text-amber-400"></i> Light</span>
+            <i id="check-light" class="fa-solid fa-check text-xs text-emerald-400 hidden"></i>
+          </button>
+          <button onclick="setTheme('red')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between hover:bg-neutral-800 text-white transition">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-circle text-red-500"></i> Red</span>
+            <i id="check-red" class="fa-solid fa-check text-xs text-emerald-400 hidden"></i>
+          </button>
+          <button onclick="setTheme('blue')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between hover:bg-neutral-800 text-white transition">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-circle text-blue-500"></i> Blue</span>
+            <i id="check-blue" class="fa-solid fa-check text-xs text-emerald-400 hidden"></i>
+          </button>
+          <button onclick="setTheme('purple')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between hover:bg-neutral-800 text-white transition">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-circle text-purple-500"></i> Purple</span>
+            <i id="check-purple" class="fa-solid fa-check text-xs text-emerald-400 hidden"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- SIDE MENU OVERLAY & DRAWER -->
+  <div id="side-menu-overlay" onclick="closeSideMenu()" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+  <aside id="side-menu" class="side-menu-drawer fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-black/95 border-r border-white/30 z-50 -translate-x-full shadow-2xl flex flex-col justify-between p-6 overflow-y-auto">
+    <div class="space-y-6">
+      <div class="flex items-center justify-between border-b border-neutral-800 pb-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-white text-black flex items-center justify-center font-black">
+            <i class="fa-solid fa-graduation-cap text-lg"></i>
+          </div>
+          <div>
+            <h3 class="font-black text-sm text-white uppercase tracking-wider">EduRank Menu</h3>
+            <p class="text-[10px] text-neutral-400">CYBER PASIYA</p>
+          </div>
+        </div>
+        <button onclick="closeSideMenu()" class="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-700 text-neutral-300 hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div id="side-stagger-container" class="space-y-6">
+        <div class="stagger-item space-y-2">
+          <p class="text-[10px] font-black uppercase tracking-widest text-neutral-500 px-2">Navigation</p>
+          
+          <!-- HOME BUTTON -->
+          <button onclick="switchTab('student'); closeSideMenu(); createRipple(event)" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800 text-white font-bold text-xs transition mb-2">
+            <i class="fa-solid fa-house text-amber-400"></i>
+            <span>Home</span>
+          </button>
+
+          <button onclick="switchTab('student'); closeSideMenu(); createRipple(event)" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800 text-white font-bold text-xs transition">
+            <i class="fa-solid fa-magnifying-glass text-white"></i>
+            <span>Check Result & Rank</span>
+          </button>
+          
+          <!-- TEACHER ADMIN SECTION WITH SUB-MENU -->
+          <div class="pt-1">
+            <button onclick="toggleTeacherAdminMenu(); createRipple(event)" class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800 text-white font-bold text-xs transition">
+              <span class="flex items-center gap-3"><i class="fa-solid fa-user-shield text-amber-400"></i> Teacher Admin</span>
+              <i class="fa-solid fa-chevron-down text-[10px] text-neutral-400 transition-transform duration-300" id="teacher-admin-arrow"></i>
+            </button>
+
+            <!-- Staff & Teacher Categories Sub-menu -->
+            <div id="teacher-admin-sub-menu" class="hidden pl-3 space-y-1.5 pt-2">
+              <div onclick="openTeacherAdminCategory('stf')" class="stagger-item px-3.5 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-users-gear text-blue-400"></i> Staff (Admin Panel)</span>
+                <i class="fa-solid fa-chevron-right text-[10px] text-neutral-500"></i>
+              </div>
+              <div onclick="openTeacherAdminCategory('techer')" class="stagger-item px-3.5 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-chalkboard-user text-emerald-400"></i> Teacher (Portal View)</span>
+                <i class="fa-solid fa-chevron-right text-[10px] text-neutral-500"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAPERS SECTION IN SIDE MENU -->
+        <div class="stagger-item space-y-2 pt-2 border-t border-neutral-900">
+          <p class="text-[10px] font-black uppercase tracking-widest text-neutral-500 px-2">Download Papers</p>
+          <button onclick="togglePapersMenu(); createRipple(event)" class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-neutral-900/60 hover:bg-neutral-800 border border-neutral-800 text-white font-bold text-xs transition">
+            <span class="flex items-center gap-3"><i class="fa-solid fa-file-pdf text-red-500"></i> Papers & Answers</span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-neutral-400 transition-transform duration-300" id="papers-menu-arrow"></i>
+          </button>
+
+          <!-- Papers Sub-menu Classes -->
+          <div id="papers-sub-menu" class="hidden pl-2 space-y-1.5 pt-1">
+            <div onclick="openPaperClassModal('2026 A/L')" class="stagger-item px-3 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+              <span>2026 A/L</span>
+              <i class="fa-solid fa-chevron-right text-[10px] text-neutral-500"></i>
+            </div>
+            <div onclick="openPaperClassModal('2027 A/L')" class="stagger-item px-3 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+              <span>2027 A/L</span>
+              <i class="fa-solid fa-chevron-right text-[10px] text-neutral-500"></i>
+            </div>
+            <div onclick="openPaperClassModal('Grade 11')" class="stagger-item px-3 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+              <span>Grade 11</span>
+              <i class="fa-solid fa-chevron-right text-[10px] text-neutral-500"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="stagger-item space-y-2 pt-2 border-t border-neutral-900">
+          <p class="text-[10px] font-black uppercase tracking-widest text-neutral-500 px-2">Official Channels & Groups</p>
+          <a href="https://youtube.com/@ict.r.kolambage?si=IPB81EXq6ufPcJ3u" target="_blank" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-red-600/10 border border-red-500/30 text-white font-bold text-xs hover:bg-red-600/20 transition">
+            <i class="fa-brands fa-youtube text-red-500 text-base"></i>
+            <span>YouTube Channel</span>
+          </a>
+          <button onclick="openWpGroupModal(); closeSideMenu(); createRipple(event)" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-emerald-600/10 border border-emerald-500/30 text-white font-bold text-xs hover:bg-emerald-600/20 transition mt-2">
+            <i class="fa-brands fa-whatsapp text-emerald-400 text-base"></i>
+            <span>WhatsApp Groups</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="side-dev-box" class="stagger-item pt-6 border-t border-neutral-800">
+      <div class="p-3 bg-neutral-950 rounded-xl border border-neutral-800 flex items-center justify-between">
+        <div>
+          <marquee><p class="text-xs font-extrabold text-white">Ashen Madushanka</p></marquee> 
+          <p class="text-[10px] text-neutral-400">System Developer</p>
+        </div>
+        <a href="https://wa.me/94711268084" target="_blank" class="text-emerald-400 text-xs font-bold flex items-center gap-1">
+          <i class="fa-brands fa-whatsapp"></i> Contact
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+
+    <!-- STUDENT VIEW -->
+    <section id="student-view" class="space-y-10">
+      <div class="text-center max-w-2xl mx-auto space-y-4">
+        <span class="inline-flex items-center gap-2 bg-neutral-900 border border-white/20 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-md">
+          <i class="fa-solid fa-bolt text-amber-400"></i> Real-Time Class & Rank System
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+          ඔබගේ විභාග ලකුණු සහ නගරයේ ශ්‍රේණිය (Rank) පරීක්ෂා කරන්න
+        </h2>
+        <p class="text-xs sm:text-base opacity-80 font-medium">
+          ඔබගේ නම, නගරය, පන්තිය සහ මොඩල් පේපරය තෝරා Result එක ලබාගන්න.
+        </p>
+      </div>
+
+      <!-- Search Box -->
+      <div class="max-w-xl mx-auto">
+        <div class="glass-card p-6 sm:p-10 rounded-3xl relative">
+          <form onsubmit="handleSearch(event)" class="space-y-6">
+            <div>
+              <label class="block text-xs font-black uppercase tracking-widest mb-2.5 opacity-90">
+                <i class="fa-regular fa-user mr-1.5"></i> Student Name (ශිෂ්‍යයාගේ නම)
+              </label>
+              <input type="text" id="search-name" required placeholder="උදා: Ashen madushanka" class="w-full bg-black/40 border border-white/20 rounded-2xl px-5 py-3.5 text-white placeholder-neutral-500 focus:outline-none focus:border-white transition text-sm font-semibold">
+            </div>
+
+            <!-- Custom Animated Dropdowns Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              <!-- Custom Animated City Dropdown -->
+              <div class="relative">
+                <label class="block text-xs font-black uppercase tracking-widest mb-2.5 opacity-90">
+                  <i class="fa-solid fa-location-dot mr-1.5"></i> City (නගරය)
+                </label>
+                <input type="hidden" id="search-city" required>
+                <button type="button" onclick="toggleCustomDropdown('city'); createRipple(event)" class="w-full bg-black/40 border border-white/20 rounded-2xl px-5 py-3.5 text-white flex items-center justify-between text-sm font-semibold focus:outline-none focus:border-white transition">
+                  <span id="city-selected-text" class="text-neutral-400">නගරය තෝරන්න</span>
+                  <i class="fa-solid fa-chevron-down text-xs text-neutral-400 transition-transform duration-300" id="city-arrow"></i>
+                </button>
+
+                <div id="city-dropdown-menu" class="hidden absolute left-0 right-0 mt-2 bg-neutral-950/95 border border-white/20 rounded-2xl shadow-2xl p-2 z-50 space-y-1 backdrop-blur-xl">
+                  <div onclick="selectCustomOption('city', 'karandeniya', 'karandeniya')" class="stagger-item px-4 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+                    <span>karandeniya</span>
+                    <i class="fa-solid fa-check text-emerald-400 opacity-0 check-mark"></i>
+                  </div>
+                  <div onclick="selectCustomOption('city', 'ambalangoda', 'ambalangoda')" class="stagger-item px-4 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+                    <span>ambalangoda</span>
+                    <i class="fa-solid fa-check text-emerald-400 opacity-0 check-mark"></i>
+                  </div>
+                  <div onclick="selectCustomOption('city', 'Galle', 'Galle')" class="stagger-item px-4 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+                    <span>Galle</span>
+                    <i class="fa-solid fa-check text-emerald-400 opacity-0 check-mark"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Custom Animated Class Dropdown -->
+              <div class="relative">
+                <label class="block text-xs font-black uppercase tracking-widest mb-2.5 opacity-90">
+                  <i class="fa-solid fa-graduation-cap mr-1.5"></i> Class / Batch (පන්තිය)
+                </label>
+                <input type="hidden" id="search-class" required>
+                <button type="button" onclick="toggleCustomDropdown('class'); createRipple(event)" class="w-full bg-black/40 border border-white/20 rounded-2xl px-5 py-3.5 text-white flex items-center justify-between text-sm font-semibold focus:outline-none focus:border-white transition">
+                  <span id="class-selected-text" class="text-neutral-400">පන්තිය තෝරන්න</span>
+                  <i class="fa-solid fa-chevron-down text-xs text-neutral-400 transition-transform duration-300" id="class-arrow"></i>
+                </button>
+
+                <div id="class-dropdown-menu" class="hidden absolute left-0 right-0 mt-2 bg-neutral-950/95 border border-white/20 rounded-2xl shadow-2xl p-2 z-50 space-y-1 backdrop-blur-xl max-h-60 overflow-y-auto">
+                  <div onclick="selectCustomOption('class', '2026 A/L', '2026 A/L')" class="stagger-item px-4 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+                    <span>2026 A/L</span>
+                    <i class="fa-solid fa-check text-emerald-400 opacity-0 check-mark"></i>
+                  </div>
+                  <div onclick="selectCustomOption('class', '2027 A/L', '2027 A/L')" class="stagger-item px-4 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+                    <span>2027 A/L</span>
+                    <i class="fa-solid fa-check text-emerald-400 opacity-0 check-mark"></i>
+                  </div>
+                  <div onclick="selectCustomOption('class', '2028 A/L', '2028 A/L')" class="stagger-item px-4 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+                    <span>2028 A/L</span>
+                    <i class="fa-solid fa-check text-emerald-400 opacity-0 check-mark"></i>
+                  </div>
+                  <div onclick="selectCustomOption('class', 'Grade 11', 'Grade 11')" class="stagger-item px-4 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+                    <span>Grade 11</span>
+                    <i class="fa-solid fa-check text-emerald-400 opacity-0 check-mark"></i>
+                  </div>
+                  <div onclick="selectCustomOption('class', 'Grade 10', 'Grade 10')" class="stagger-item px-4 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+                    <span>Grade 10</span>
+                    <i class="fa-solid fa-check text-emerald-400 opacity-0 check-mark"></i>
+                  </div>
+                  <div onclick="selectCustomOption('class', 'Grade 09', 'Grade 09')" class="stagger-item px-4 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-neutral-800 cursor-pointer transition flex items-center justify-between">
+                    <span>Grade 09</span>
+                    <i class="fa-solid fa-check text-emerald-400 opacity-0 check-mark"></i>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Model Paper Selection for Students -->
+            <div>
+              <label class="block text-xs font-black uppercase tracking-widest mb-2.5 opacity-90">
+                <i class="fa-solid fa-file-lines mr-1.5"></i> Model Paper (මොඩල් පේපරය)
+              </label>
+              <select id="search-paper-title" required class="w-full bg-black/40 border border-white/20 rounded-2xl px-5 py-3.5 text-white text-sm font-semibold focus:outline-none focus:border-white transition">
+                <option value="" disabled selected class="bg-black text-neutral-400">ප්‍රශ්න පත්‍රය තෝරන්න</option>
+                <option value="Model Paper 1 - ICT" class="bg-black">Model Paper 1 - ICT</option>
+                <option value="Model Paper 2 - ICT" class="bg-black">Model Paper 2 - ICT</option>
+              </select>
+            </div>
+
+            <button type="submit" onclick="createRipple(event)" class="w-full glow-white-btn font-black py-4 rounded-2xl transition duration-300 flex items-center justify-center space-x-3 shadow-xl uppercase tracking-wider">
+              <i class="fa-solid fa-magnifying-glass text-lg"></i>
+              <span>ලකුණු සහ RANK එක බලන්න</span>
+            </button>
+          </form>
+
+          <!-- Branding Button -->
+          <div class="mt-8 pt-6 border-t border-white/10 text-center">
+            <button onclick="openBrandModal(); createRipple(event)" class="w-full inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-2xl bg-black/60 border border-white/30 shadow-xl group hover:border-white transition duration-300">
+              <i class="fa-brands fa-youtube text-red-500 text-lg animate-pulse"></i>
+              <span class="text-xs sm:text-sm font-black tracking-widest uppercase text-white flex items-center gap-2">
+                <i class="fa-solid fa-crown text-amber-400 crown-glow"></i>
+                ICT KING CYBER PASIYA
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result Card & Progress Chart Container -->
+      <div id="result-container" class="max-w-2xl mx-auto hidden space-y-8"></div>
+    </section>
+
+    <!-- ADMIN VIEW (STAFF) -->
+    <section id="admin-view" class="hidden space-y-8">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-white/10 pb-6 gap-4">
+        <div>
+          <h2 class="text-2xl font-black flex items-center gap-3">
+            <i class="fa-solid fa-users-gear text-blue-400"></i> Staff Admin Panel
+          </h2>
+          <p class="text-xs text-neutral-400 mt-1">ශිෂ්‍යයින්ගේ ලකුණු Model Paper එක අනුව එකතු කිරීම සහ පාලනය කිරීම මෙතැනින් සිදුකරන්න.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="openChangePassModal()" class="px-4 py-2 bg-neutral-900 border border-white/20 rounded-xl text-xs font-bold hover:border-white transition flex items-center gap-2">
+            <i class="fa-solid fa-key text-amber-400"></i> Change Password
+          </button>
+          <button onclick="adminLogout()" class="px-4 py-2 bg-neutral-900 border border-white/20 rounded-xl text-xs font-bold hover:border-white transition flex items-center gap-2">
+            <i class="fa-solid fa-right-from-bracket text-red-400"></i> Logout
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Add Student / Upload Paper Card -->
+        <div class="glass-card p-6 rounded-3xl h-fit space-y-6">
+          <h3 class="text-lg font-bold mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-circle-plus text-emerald-400"></i> ලකුණු ඇතුළත් කරන්න
+          </h3>
+          <form onsubmit="handleAddStudent(event)" class="space-y-4">
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-80">Student Name</label>
+              <input type="text" id="admin-name" required placeholder="e.g. Ashen madushanka" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm">
+            </div>
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-80">Class / Batch</label>
+              <select id="admin-class" required class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm">
+                <option value="2026 A/L" class="bg-black">2026 A/L</option>
+                <option value="2027 A/L" class="bg-black">2027 A/L</option>
+                <option value="Grade 11" class="bg-black">Grade 11</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-80">City / Town</label>
+              <select id="admin-city" required class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm">
+                <option value="karandeniya" class="bg-black">karandeniya</option>
+                <option value="ambalangoda" class="bg-black">ambalangoda</option>
+                <option value="Galle" class="bg-black">Galle</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-80">Select Model Paper</label>
+              <select id="admin-paper-title" required class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm">
+                <option value="Model Paper 1 - ICT" class="bg-black">Model Paper 1 - ICT</option>
+                <option value="Model Paper 2 - ICT" class="bg-black">Model Paper 2 - ICT</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-80">Total Marks (0 - 100)</label>
+              <input type="number" id="admin-marks" min="0" max="100" required placeholder="e.g. 85" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm">
+            </div>
+            <button type="submit" class="w-full glow-white-btn font-bold py-3.5 rounded-xl uppercase text-xs tracking-wider">Save Student Record</button>
+          </form>
+
+          <div class="pt-6 border-t border-white/10 space-y-4">
+            <h3 class="text-lg font-bold flex items-center gap-2">
+              <i class="fa-solid fa-file-arrow-up text-blue-400"></i> Upload Paper / Scheme / YT
+            </h3>
+            <form onsubmit="handleUploadPaper(event)" class="space-y-4">
+              <div>
+                <label class="block text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-80">Select Class</label>
+                <select id="upload-paper-class" required class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm">
+                  <option value="2026 A/L" class="bg-black">2026 A/L</option>
+                  <option value="2027 A/L" class="bg-black">2027 A/L</option>
+                  <option value="Grade 11" class="bg-black">Grade 11</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-80">Paper Title</label>
+                <input type="text" id="upload-paper-title" required placeholder="e.g. Model Paper 1 - ICT" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm">
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-80">Question PDF URL</label>
+                  <input type="text" id="upload-paper-url" required placeholder="https://..." class="w-full bg-black/40 border border-white/20 rounded-xl px-3 py-2.5 text-white text-xs">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-80">Marking Scheme URL</label>
+                  <input type="text" id="upload-scheme-url" required placeholder="https://..." class="w-full bg-black/40 border border-white/20 rounded-xl px-3 py-2.5 text-white text-xs">
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] font-black uppercase tracking-widest mb-1.5 opacity-80">YouTube Recording Link</label>
+                <input type="text" id="upload-yt-url" required placeholder="https://youtube.com/..." class="w-full bg-black/40 border border-white/20 rounded-xl px-3 py-2.5 text-white text-xs">
+              </div>
+              <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition">Upload Paper</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Master Leaderboard -->
+        <div class="lg:col-span-2 glass-card p-6 rounded-3xl space-y-4">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <h3 class="text-lg font-black flex items-center gap-2">
+              <i class="fa-solid fa-trophy text-amber-400"></i> Master Leaderboard
+            </h3>
+            <div class="flex items-center gap-2 flex-wrap">
+              <select id="filter-class" onchange="renderAdminTable()" class="bg-black/50 border border-white/20 rounded-xl px-3 py-1.5 text-xs font-bold text-white">
+                <option value="ALL">All Classes</option>
+                <option value="2026 A/L">2026 A/L</option>
+                <option value="2027 A/L">2027 A/L</option>
+                <option value="Grade 11">Grade 11</option>
+              </select>
+              <select id="filter-paper" onchange="renderAdminTable()" class="bg-black/50 border border-white/20 rounded-xl px-3 py-1.5 text-xs font-bold text-white">
+                <option value="ALL">All Model Papers</option>
+                <option value="Model Paper 1 - ICT">Model Paper 1 - ICT</option>
+                <option value="Model Paper 2 - ICT">Model Paper 2 - ICT</option>
+              </select>
+              <span id="total-count-badge" class="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-bold">Total: 0</span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="border-b border-white/10 text-xs font-bold opacity-70">
+                  <th class="py-3 px-2">RANK</th>
+                  <th class="py-3 px-2">NAME</th>
+                  <th class="py-3 px-2">PAPER</th>
+                  <th class="py-3 px-2">CLASS</th>
+                  <th class="py-3 px-2">CITY</th>
+                  <th class="py-3 px-2">MARKS</th>
+                  <th class="py-3 px-2">GRADE</th>
+                  <th class="py-3 px-2 text-center">ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="admin-table-body" class="divide-y divide-white/5 text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEACHER PORTAL VIEW (TEACHER) -->
+    <section id="teacher-view" class="hidden space-y-8">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-white/10 pb-6 gap-4">
+        <div>
+          <h2 class="text-2xl font-black flex items-center gap-3">
+            <i class="fa-solid fa-chalkboard-user text-emerald-400"></i> Teacher Portal - Lamayinge Visthara & Ranks
+          </h2>
+          <p class="text-xs text-neutral-400 mt-1">ගුරුවරුන්ට තමන්ගේ ළමයින්ගේ ලකුණු, පන්තිය, paper එක සහ නගරය අනුව ranks බලාගැනීමට හැකි පද්ධතිය.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="openChangePassModal()" class="px-4 py-2 bg-neutral-900 border border-white/20 rounded-xl text-xs font-bold hover:border-white transition flex items-center gap-2">
+            <i class="fa-solid fa-key text-amber-400"></i> Change Password
+          </button>
+          <button onclick="switchTab('student')" class="px-4 py-2 bg-neutral-900 border border-white/20 rounded-xl text-xs font-bold hover:border-white transition flex items-center gap-2">
+            <i class="fa-solid fa-arrow-left text-neutral-300"></i> Back to Home
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6 max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider mb-2 opacity-80">Select Class (පන්තිය)</label>
+            <select id="teacher-filter-class" onchange="renderTeacherPortal()" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm">
+              <option value="ALL">All Classes</option>
+              <option value="2026 A/L">2026 A/L</option>
+              <option value="2027 A/L">2027 A/L</option>
+              <option value="Grade 11">Grade 11</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider mb-2 opacity-80">Select Paper (ප්‍රශ්න පත්‍රය)</label>
+            <select id="teacher-filter-paper" onchange="renderTeacherPortal()" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm">
+              <option value="ALL">All Papers</option>
+              <option value="Model Paper 1 - ICT">Model Paper 1 - ICT</option>
+              <option value="Model Paper 2 - ICT">Model Paper 2 - ICT</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider mb-2 opacity-80">Select City (නගරය)</label>
+            <select id="teacher-filter-city" onchange="renderTeacherPortal()" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-sm">
+              <option value="ALL">All Cities</option>
+              <option value="karandeniya">karandeniya</option>
+              <option value="ambalangoda">ambalangoda</option>
+              <option value="Galle">Galle</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto pt-2">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-white/10 text-xs font-bold opacity-70">
+                <th class="py-3 px-3">RANK</th>
+                <th class="py-3 px-3">STUDENT NAME</th>
+                <th class="py-3 px-3">CLASS</th>
+                <th class="py-3 px-3">CITY</th>
+                <th class="py-3 px-3">PAPER</th>
+                <th class="py-3 px-3">MARKS</th>
+                <th class="py-3 px-3">GRADE</th>
+              </tr>
+            </thead>
+            <tbody id="teacher-table-body" class="divide-y divide-white/5 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- BRANDING MODAL -->
+  <div id="brand-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-lg w-full p-6 sm:p-8 rounded-3xl space-y-4">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <h3 class="text-lg font-black flex items-center gap-2">
+          <i class="fa-solid fa-crown text-amber-400 crown-glow"></i> ICT KING CYBER PASIYA
+        </h3>
+        <button onclick="closeBrandModal()" class="text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div id="brand-stagger-container" class="space-y-3">
+        <a href="https://youtube.com/@ict.r.kolambage?si=IPB81EXq6ufPcJ3u" target="_blank" class="stagger-item w-full glow-white-btn py-3.5 rounded-2xl flex items-center justify-center gap-2">
+          <i class="fa-brands fa-youtube text-red-600 text-lg"></i>
+          <span class="text-xs uppercase font-black">Official YouTube Channel</span>
+        </a>
+
+        <button onclick="closeBrandModal(); openWpGroupModal(); createRipple(event)" class="stagger-item w-full bg-emerald-600/20 border border-emerald-500/50 hover:bg-emerald-600/30 text-white font-black py-3.5 rounded-2xl flex items-center justify-center gap-2 transition">
+          <i class="fa-brands fa-whatsapp text-emerald-400 text-lg"></i>
+          <span class="text-xs uppercase">Join Official WhatsApp Group</span>
+        </button>
+
+        <div class="stagger-item p-3 bg-black/50 rounded-xl border border-white/10 flex items-center justify-between text-left mt-2">
+          <div>
+            <marquee><p class="text-xs font-extrabold text-white">Ashen Madushanka🔰</p></marquee>
+            <p class="text-[10px] text-neutral-400">System Developer</p>
+          </div>
+          <a href="https://wa.me/94711268084" target="_blank" class="text-emerald-400 text-xs font-bold flex items-center gap-1">
+           <i class="fa-brands fa-whatsapp text-emerald-400 text-lg"></i> Contact
+          </a>
+          <a href="https://youtube.com/@asmodz1?si=O1ddVVn-DXkdiLut" target="_blank" class="text-emerald-400 text-xs font-bold flex items-center gap-1">
+           <i class="fa-brands fa-youtube text-red-600 text-lg"></i>
+          <span class="text-xs uppercase font-black">YouTube</span>
+          </a>
+        </div>
+
+        <button onclick="closeBrandModal()" class="stagger-item w-full bg-neutral-900 border border-white/20 font-bold py-2.5 rounded-xl text-xs uppercase mt-2">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHATSAPP GROUPS MODAL -->
+  <div id="wp-group-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-6 sm:p-8 rounded-3xl space-y-5">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-brands fa-whatsapp text-emerald-400 text-2xl animate-pulse"></i>
+          <div>
+            <h3 class="text-base font-black text-white uppercase tracking-wider">Select Your Grade</h3>
+            <p class="text-[10px] text-neutral-400">WhatsApp Official Groups</p>
+          </div>
+        </div>
+        <button onclick="closeWpGroupModal()" class="w-8 h-8 rounded-xl bg-neutral-900 border border-neutral-700 text-neutral-300 hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="wp-stagger-container" class="space-y-3">
+        <a href="https://chat.whatsapp.com/IVPAWq3pQcmJ9fovyOgjtL" target="_blank" class="stagger-item flex items-center justify-between p-3.5 bg-neutral-900/85 hover:bg-emerald-950/40 border border-emerald-500/30 hover:border-emerald-400 rounded-2xl transition group">
+          <div class="flex items-center gap-3">
+            <span class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 font-black text-xs flex items-center justify-center border border-emerald-500/30">09</span>
+            <span class="text-xs font-bold text-white group-hover:text-emerald-300 transition">Grade 09 WhatsApp Group</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-neutral-500 group-hover:text-emerald-400 transition"></i>
+        </a>
+        <a href="https://chat.whatsapp.com/IVPAWq3pQcmJ9fovyOgjtL" target="_blank" class="stagger-item flex items-center justify-between p-3.5 bg-neutral-900/85 hover:bg-emerald-950/40 border border-emerald-500/30 hover:border-emerald-400 rounded-2xl transition group">
+          <div class="flex items-center gap-3">
+            <span class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 font-black text-xs flex items-center justify-center border border-emerald-500/30">10</span>
+            <span class="text-xs font-bold text-white group-hover:text-emerald-300 transition">Grade 10 WhatsApp Group</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-neutral-500 group-hover:text-emerald-400 transition"></i>
+        </a>
+        <a href="https://chat.whatsapp.com/IVPAWq3pQcmJ9fovyOgjtL" target="_blank" class="stagger-item flex items-center justify-between p-3.5 bg-neutral-900/85 hover:bg-emerald-950/40 border border-emerald-500/30 hover:border-emerald-400 rounded-2xl transition group">
+          <div class="flex items-center gap-3">
+            <span class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 font-black text-xs flex items-center justify-center border border-emerald-500/30">11</span>
+            <span class="text-xs font-bold text-white group-hover:text-emerald-300 transition">Grade 11 WhatsApp Group</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-neutral-500 group-hover:text-emerald-400 transition"></i>
+        </a>
+        <a href="https://chat.whatsapp.com/IVPAWq3pQcmJ9fovyOgjtL" target="_blank" class="stagger-item flex items-center justify-between p-3.5 bg-neutral-900/85 hover:bg-emerald-950/40 border border-emerald-500/30 hover:border-emerald-400 rounded-2xl transition group">
+          <div class="flex items-center gap-3">
+            <span class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 font-black text-xs flex items-center justify-center border border-emerald-500/30">12</span>
+            <span class="text-xs font-bold text-white group-hover:text-emerald-300 transition">2026 A/L (Grade 12) Group</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-neutral-500 group-hover:text-emerald-400 transition"></i>
+        </a>
+      </div>
+
+      <button onclick="closeWpGroupModal()" class="w-full bg-neutral-900 border border-white/20 font-bold py-2.5 rounded-xl text-xs uppercase text-neutral-300 hover:text-white transition">Close</button>
+    </div>
+  </div>
+
+  <!-- PAPERS SELECTION MODAL -->
+  <div id="paper-download-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-lg w-full p-6 sm:p-8 rounded-3xl space-y-5">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div>
+          <h3 id="modal-paper-class-title" class="text-base font-black text-white uppercase tracking-wider">Papers</h3>
+          <p class="text-[10px] text-neutral-400">Select paper to download question, marking or watch YT recording</p>
+        </div>
+        <button onclick="closePaperDownloadModal()" class="w-8 h-8 rounded-xl bg-neutral-900 border border-neutral-700 text-neutral-300 hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="papers-list-container" class="space-y-3 max-h-72 overflow-y-auto"></div>
+
+      <button onclick="closePaperDownloadModal()" class="w-full bg-neutral-900 border border-white/20 font-bold py-2.5 rounded-xl text-xs uppercase text-neutral-300 hover:text-white transition">Close</button>
+    </div>
+  </div>
+
+  <!-- PASSWORD MODAL -->
+  <div id="password-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-8 rounded-3xl space-y-6 text-center">
+      <h3 id="password-modal-title" class="text-2xl font-black">Password Needed</h3>
+      <p class="text-xs text-neutral-400">මෙම අංශයට පිවිසීමට අදාළ password එක ඇතුළත් කරන්න.</p>
+      <form onsubmit="verifyPassword(event)" class="space-y-4">
+        <input type="password" id="admin-pass-input" required placeholder="Enter Password" class="w-full bg-black/50 border border-white/20 rounded-2xl px-5 py-3.5 text-center text-lg font-bold text-white">
+        <div class="flex gap-3">
+          <button type="button" onclick="closePasswordModal()" class="w-1/2 bg-neutral-900 py-3 rounded-xl text-sm font-bold text-white">Cancel</button>
+          <button type="submit" class="w-1/2 glow-white-btn py-3 rounded-xl text-sm uppercase">Login</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD MODAL -->
+  <div id="change-pass-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-8 rounded-3xl space-y-6">
+      <h3 class="text-xl font-black">Change Staff Password</h3>
+      <form onsubmit="handlePasswordChange(event)" class="space-y-4">
+        <div>
+          <label class="block text-[10px] uppercase font-bold mb-1 opacity-70">New Staff Password</label>
+          <input type="password" id="new-admin-pass" required class="w-full bg-black/50 border border-white/20 rounded-xl px-4 py-3 text-white">
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="closeChangePassModal()" class="w-1/2 bg-neutral-900 py-3 rounded-xl text-xs font-bold uppercase">Cancel</button>
+          <button type="submit" class="w-1/2 glow-white-btn py-3 rounded-xl text-xs uppercase">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let defaultStudents = [
+      { id: 1, name: "ashen", studentClass: "2026 A/L", city: "karandeniya", paperTitle: "Model Paper 1 - ICT", marks: 67 },
+      { id: 2, name: "ashen", studentClass: "2026 A/L", city: "karandeniya", paperTitle: "Model Paper 2 - ICT", marks: 82 }
+    ];
+
+    let defaultPapers = [
+      { id: 1, paperClass: "2026 A/L", title: "Model Paper 1 - ICT", questionUrl: "#", schemeUrl: "#", ytUrl: "https://youtube.com/@ict.r.kolambage?si=IPB81EXq6ufPcJ3u" },
+      { id: 2, paperClass: "2026 A/L", title: "Model Paper 2 - ICT", questionUrl: "#", schemeUrl: "#", ytUrl: "https://youtube.com/@ict.r.kolambage?si=IPB81EXq6ufPcJ3u" },
+      { id: 3, paperClass: "2027 A/L", title: "Model Paper 1 - ICT", questionUrl: "#", schemeUrl: "#", ytUrl: "https://youtube.com/@ict.r.kolambage?si=IPB81EXq6ufPcJ3u" }
+    ];
+
+    let students = JSON.parse(localStorage.getItem('student_records')) || defaultStudents;
+    let papersList = JSON.parse(localStorage.getItem('paper_records')) || defaultPapers;
+    
+    let staffPassword = localStorage.getItem('staff_pass') || 'ashen20071230';
+    let teacherPassword = 'ravidukolabage1234';
+
+    let isAdminAuthenticated = false;
+    let isTeacherAuthenticated = false;
+    let activeLoginTarget = '';
+    let studentProgressChartInstance = null;
+
+    // Mouse Move Butterfly Trail Effect
+    let lastTime = 0;
+    window.addEventListener('mousemove', function(e) {
+      const currentTime = Date.now();
+      if (currentTime - lastTime > 50) { // Throttle to prevent lag
+        lastTime = currentTime;
+        const particle = document.createElement('div');
+        particle.className = 'butterfly-particle';
+        particle.style.left = `${e.clientX}px`;
+        particle.style.top = `${e.clientY}px`;
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 800);
+      }
+    });
+
+    function toggleTeacherAdminMenu() {
+      const menu = document.getElementById('teacher-admin-sub-menu');
+      const arrow = document.getElementById('teacher-admin-arrow');
+      const isHidden = menu.classList.contains('hidden');
+      if (isHidden) {
+        menu.classList.remove('hidden');
+        arrow.classList.add('rotate-180');
+        setTimeout(() => menu.classList.add('stagger-open'), 30);
+      } else {
+        menu.classList.remove('stagger-open');
+        arrow.classList.remove('rotate-180');
+        setTimeout(() => menu.classList.add('hidden'), 250);
+      }
+    }
+
+    function openTeacherAdminCategory(category) {
+      closeSideMenu();
+      activeLoginTarget = category;
+      if (category === 'stf') {
+        document.getElementById('password-modal-title').innerText = "Staff Admin Password";
+        if (!isAdminAuthenticated) {
+          openPasswordModal();
+        } else {
+          switchTab('admin');
+        }
+      } else if (category === 'techer') {
+        document.getElementById('password-modal-title').innerText = "Teacher Portal Password";
+        if (!isTeacherAuthenticated) {
+          openPasswordModal();
+        } else {
+          switchTab('teacher');
+        }
+      }
+    }
+
+    function togglePapersMenu() {
+      const menu = document.getElementById('papers-sub-menu');
+      const arrow = document.getElementById('papers-menu-arrow');
+      const isHidden = menu.classList.contains('hidden');
+      if (isHidden) {
+        menu.classList.remove('hidden');
+        arrow.classList.add('rotate-180');
+        setTimeout(() => menu.classList.add('stagger-open'), 30);
+      } else {
+        menu.classList.remove('stagger-open');
+        arrow.classList.remove('rotate-180');
+        setTimeout(() => menu.classList.add('hidden'), 250);
+      }
+    }
+
+    function openPaperClassModal(className) {
+      closeSideMenu();
+      const modal = document.getElementById('paper-download-modal');
+      document.getElementById('modal-paper-class-title').innerText = `${className} - Papers`;
+      
+      const container = document.getElementById('papers-list-container');
+      const filteredPapers = papersList.filter(p => p.paperClass === className);
+
+      if (filteredPapers.length === 0) {
+        container.innerHTML = `<p class="text-xs text-neutral-400 text-center py-4">No papers uploaded yet for ${className}.</p>`;
+      } else {
+        container.innerHTML = '';
+        filteredPapers.forEach(p => {
+          container.innerHTML += `
+            <div class="p-4 bg-neutral-900/85 border border-white/10 rounded-2xl space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">${p.title}</span>
+                <a href="${p.ytUrl || '#'}" target="_blank" class="px-3 py-1.5 bg-red-600/20 border border-red-500/40 text-red-400 rounded-xl text-[10px] font-extrabold hover:bg-red-600/30 transition flex items-center gap-1.5">
+                  <i class="fa-brands fa-youtube"></i> Watch YT Recording
+                </a>
+              </div>
+              <div class="flex items-center gap-2 pt-2 border-t border-white/5">
+                <a href="${p.questionUrl}" target="_blank" class="w-1/2 text-center py-2 bg-blue-600/20 border border-blue-500/40 text-blue-400 rounded-xl text-[10px] font-extrabold hover:bg-blue-600/30 transition">Download Paper</a>
+                <a href="${p.schemeUrl}" target="_blank" class="w-1/2 text-center py-2 bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 rounded-xl text-[10px] font-extrabold hover:bg-emerald-600/30 transition">Marking Scheme</a>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closePaperDownloadModal() {
+      document.getElementById('paper-download-modal').classList.add('hidden');
+    }
+
+    function handleUploadPaper(e) {
+      e.preventDefault();
+      const paperClass = document.getElementById('upload-paper-class').value;
+      const title = document.getElementById('upload-paper-title').value.trim();
+      const questionUrl = document.getElementById('upload-paper-url').value.trim();
+      const schemeUrl = document.getElementById('upload-scheme-url').value.trim();
+      const ytUrl = document.getElementById('upload-yt-url').value.trim();
+
+      papersList.push({ id: Date.now(), paperClass, title, questionUrl, schemeUrl, ytUrl });
+      localStorage.setItem('paper_records', JSON.stringify(papersList));
+
+      document.getElementById('upload-paper-title').value = '';
+      document.getElementById('upload-paper-url').value = '';
+      document.getElementById('upload-scheme-url').value = '';
+      document.getElementById('upload-yt-url').value = '';
+      updatePaperDropdowns();
+      alert('ප්‍රශ්න පත්‍රය සහ YouTube recording link එක සාර්ථකව අප්‌ලෝඩ් කළා!');
+    }
+
+    function updatePaperDropdowns() {
+      const studentPaperSelect = document.getElementById('search-paper-title');
+      const adminPaperSelect = document.getElementById('admin-paper-title');
+      const filterPaperSelect = document.getElementById('filter-paper');
+      const teacherPaperSelect = document.getElementById('teacher-filter-paper');
+
+      let optionsHTML = `<option value="" disabled selected class="bg-black text-neutral-400">ප්‍රශ්න පත්‍රය තෝරන්න</option>`;
+      let filterHTML = `<option value="ALL">All Model Papers</option>`;
+
+      papersList.forEach(p => {
+        optionsHTML += `<option value="${p.title}" class="bg-black">${p.title} (${p.paperClass})</option>`;
+        filterHTML += `<option value="${p.title}">${p.title} (${p.paperClass})</option>`;
+      });
+
+      if (studentPaperSelect) studentPaperSelect.innerHTML = optionsHTML;
+      if (adminPaperSelect) adminPaperSelect.innerHTML = optionsHTML.replace('disabled selected', '');
+      if (filterPaperSelect) filterPaperSelect.innerHTML = filterHTML;
+      if (teacherPaperSelect) teacherPaperSelect.innerHTML = filterHTML;
+    }
+
+    function toggleCustomDropdown(type) {
+      const menu = document.getElementById(`${type}-dropdown-menu`);
+      const arrow = document.getElementById(`${type}-arrow`);
+      const isHidden = menu.classList.contains('hidden');
+      closeAllDropdowns();
+      if (isHidden) {
+        menu.classList.remove('hidden');
+        arrow.classList.add('rotate-180');
+        setTimeout(() => menu.classList.add('stagger-open'), 50);
+      }
+    }
+
+    function selectCustomOption(type, value, label) {
+      document.getElementById(`search-${type}`).value = value;
+      const labelElem = document.getElementById(`${type}-selected-text`);
+      labelElem.innerText = label;
+      labelElem.classList.remove('text-neutral-400');
+      labelElem.classList.add('text-white');
+      closeAllDropdowns();
+    }
+
+    function closeAllDropdowns() {
+      ['city', 'class'].forEach(type => {
+        const menu = document.getElementById(`${type}-dropdown-menu`);
+        const arrow = document.getElementById(`${type}-arrow`);
+        if (menu && !menu.classList.contains('hidden')) {
+          menu.classList.remove('stagger-open');
+          arrow.classList.remove('rotate-180');
+          setTimeout(() => menu.classList.add('hidden'), 250);
+        }
+      });
+    }
+
+    window.addEventListener('click', function(e) {
+      if (!e.target.closest('.relative')) closeAllDropdowns();
+    });
+
+    function openBrandModal() {
+      const modal = document.getElementById('brand-modal');
+      modal.classList.remove('hidden');
+      setTimeout(() => document.getElementById('brand-stagger-container').classList.add('stagger-open'), 50);
+    }
+
+    function closeBrandModal() {
+      const container = document.getElementById('brand-stagger-container');
+      container.classList.remove('stagger-open');
+      setTimeout(() => document.getElementById('brand-modal').classList.add('hidden'), 350);
+    }
+
+    function openWpGroupModal() {
+      const modal = document.getElementById('wp-group-modal');
+      modal.classList.remove('hidden');
+      setTimeout(() => document.getElementById('wp-stagger-container').classList.add('stagger-open'), 50);
+    }
+
+    function closeWpGroupModal() {
+      document.getElementById('wp-group-modal').classList.add('hidden');
+    }
+
+    function openSideMenu() {
+      document.getElementById('side-menu').classList.remove('-translate-x-full');
+      const overlay = document.getElementById('side-menu-overlay');
+      overlay.classList.remove('opacity-0', 'pointer-events-none');
+      overlay.classList.add('opacity-100');
+      setTimeout(() => {
+        document.getElementById('side-stagger-container').classList.add('stagger-open');
+        document.getElementById('side-dev-box').classList.add('stagger-open');
+      }, 100);
+    }
+
+    function closeSideMenu() {
+      document.getElementById('side-menu').classList.add('-translate-x-full');
+      const overlay = document.getElementById('side-menu-overlay');
+      overlay.classList.remove('opacity-100');
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+      document.getElementById('side-stagger-container').classList.remove('stagger-open');
+      document.getElementById('side-dev-box').classList.remove('stagger-open');
+    }
+
+    function toggleThemeDropdown() {
+      document.getElementById('theme-dropdown').classList.toggle('hidden');
+    }
+
+    function setTheme(themeName) {
+      document.documentElement.setAttribute('data-theme', themeName);
+      localStorage.setItem('user_theme', themeName);
+      ['dark', 'light', 'red', 'blue', 'purple'].forEach(t => {
+        const check = document.getElementById(`check-${t}`);
+        if (check) {
+          if (t === themeName) check.classList.remove('hidden');
+          else check.classList.add('hidden');
+        }
+      });
+      document.getElementById('theme-dropdown').classList.add('hidden');
+    }
+
+    setTheme(localStorage.getItem('user_theme') || 'dark');
+    updatePaperDropdowns();
+
+    function createRipple(event) {
+      const button = event.currentTarget;
+      const ripple = document.createElement("span");
+      const rect = button.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = `${size}px`;
+      ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
+      ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+      ripple.classList.add("click-ripple");
+      const existing = button.querySelector(".click-ripple");
+      if (existing) existing.remove();
+      button.appendChild(ripple);
+    }
+
+    function switchTab(tab) {
+      const studentView = document.getElementById('student-view');
+      const adminView = document.getElementById('admin-view');
+      const teacherView = document.getElementById('teacher-view');
+
+      studentView.classList.add('hidden');
+      adminView.classList.add('hidden');
+      teacherView.classList.add('hidden');
+
+      if (tab === 'student') {
+        studentView.classList.remove('hidden');
+      } else if (tab === 'admin') {
+        adminView.classList.remove('hidden');
+        renderAdminTable();
+      } else if (tab === 'teacher') {
+        teacherView.classList.remove('hidden');
+        renderTeacherPortal();
+      }
+    }
+
+    function openPasswordModal() { document.getElementById('password-modal').classList.remove('hidden'); }
+    function closePasswordModal() { document.getElementById('password-modal').classList.add('hidden'); }
+    function openChangePassModal() { document.getElementById('change-pass-modal').classList.remove('hidden'); }
+    function closeChangePassModal() { document.getElementById('change-pass-modal').classList.add('hidden'); }
+
+    function verifyPassword(e) {
+      e.preventDefault();
+      const enteredPass = document.getElementById('admin-pass-input').value;
+      
+      if (activeLoginTarget === 'stf') {
+        if (enteredPass === staffPassword) {
+          isAdminAuthenticated = true;
+          closePasswordModal();
+          document.getElementById('admin-pass-input').value = '';
+          switchTab('admin');
+        } else {
+          alert('Staff Password එක වැරදියි!');
+        }
+      } else if (activeLoginTarget === 'techer') {
+        if (enteredPass === teacherPassword) {
+          isTeacherAuthenticated = true;
+          closePasswordModal();
+          document.getElementById('admin-pass-input').value = '';
+          switchTab('teacher');
+        } else {
+          alert('Teacher Password එක වැරදියි!');
+        }
+      }
+    }
+
+    function handlePasswordChange(e) {
+      e.preventDefault();
+      const newPass = document.getElementById('new-admin-pass').value.trim();
+      if (newPass) {
+        staffPassword = newPass;
+        localStorage.setItem('staff_pass', newPass);
+        closeChangePassModal();
+        alert('Staff Password එක සාර්ථකව වෙනස් කළා!');
+      }
+    }
+
+    function adminLogout() {
+      isAdminAuthenticated = false;
+      isTeacherAuthenticated = false;
+      switchTab('student');
+    }
+
+    function renderTeacherPortal() {
+      const tbody = document.getElementById('teacher-table-body');
+      const filterClass = document.getElementById('teacher-filter-class').value;
+      const filterPaper = document.getElementById('teacher-filter-paper').value;
+      const filterCity = document.getElementById('teacher-filter-city').value;
+
+      let filtered = [...students].sort((a, b) => b.marks - a.marks);
+
+      if (filterClass !== 'ALL') {
+        filtered = filtered.filter(s => s.studentClass === filterClass);
+      }
+      if (filterPaper !== 'ALL') {
+        filtered = filtered.filter(s => (s.paperTitle || "Model Paper 1 - ICT") === filterPaper);
+      }
+      if (filterCity !== 'ALL') {
+        filtered = filtered.filter(s => s.city.toLowerCase() === filterCity.toLowerCase());
+      }
+
+      tbody.innerHTML = '';
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-xs opacity-60">No student records found for this filter.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach((s, idx) => {
+        const gradeLetter = s.marks >= 75 ? 'A' : s.marks >= 65 ? 'B' : s.marks >= 50 ? 'C' : 'S';
+        const rankDisplay = idx === 0 ? '<span class="text-amber-400 font-bold"><i class="fa-solid fa-crown"></i> #1</span>' : `#${idx + 1}`;
+
+        tbody.innerHTML += `
+          <tr class="border-b border-white/5 hover:bg-white/5 transition">
+            <td class="py-3 px-3 font-bold">${rankDisplay}</td>
+            <td class="py-3 px-3 capitalize font-semibold">${s.name}</td>
+            <td class="py-3 px-3 text-xs opacity-80"><span class="px-2 py-1 bg-white/10 rounded-lg">${s.studentClass}</span></td>
+            <td class="py-3 px-3 text-xs opacity-80 capitalize">${s.city}</td>
+            <td class="py-3 px-3 text-xs text-amber-300 font-semibold">${s.paperTitle || "Model Paper 1 - ICT"}</td>
+            <td class="py-3 px-3 font-bold text-amber-300">${s.marks}</td>
+            <td class="py-3 px-3"><span class="px-2.5 py-0.5 rounded-lg bg-white/10 text-xs font-black">${gradeLetter}</span></td>
+          </tr>
+        `;
+      });
+    }
+
+    function handleSearch(e) {
+      e.preventDefault();
+      const nameQuery = document.getElementById('search-name').value.trim().toLowerCase();
+      const cityQuery = document.getElementById('search-city').value.toLowerCase();
+      const classQuery = document.getElementById('search-class').value;
+      const paperQuery = document.getElementById('search-paper-title').value;
+
+      if(!cityQuery || !classQuery || !paperQuery) {
+        alert("කරුණාකර නගරය, පන්තිය සහ මොඩල් පේපරය තෝරන්න!");
+        return;
+      }
+
+      const resultContainer = document.getElementById('result-container');
+      resultContainer.classList.remove('hidden');
+
+      const paperStudents = students.filter(s => s.studentClass === classQuery && (s.paperTitle || "Model Paper 1 - ICT") === paperQuery).sort((a, b) => b.marks - a.marks);
+      const cityStudents = paperStudents.filter(s => s.city.toLowerCase() === cityQuery);
+      const studentIndex = paperStudents.findIndex(s => s.name.toLowerCase() === nameQuery && s.city.toLowerCase() === cityQuery);
+
+      if (studentIndex === -1) {
+        resultContainer.innerHTML = `
+          <div class="glass-card p-8 rounded-3xl text-center space-y-3">
+            <h3 class="text-xl font-bold">තොරතුරු හමු නොවීය!</h3>
+            <p class="text-xs opacity-70">ඔබ ඇතුළත් කළ නම, නගරය, පන්තිය හෝ මොඩල් පේපරය පරීක්ෂා කරන්න.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const student = paperStudents[studentIndex];
+      const paperRank = studentIndex + 1;
+      const cityRank = cityStudents.findIndex(s => s.id === student.id) + 1;
+      const gradeLetter = student.marks >= 75 ? 'A' : student.marks >= 65 ? 'B' : student.marks >= 50 ? 'C' : 'S';
+
+      const matchedPaper = papersList.find(p => p.title === student.paperTitle);
+      const ytLink = matchedPaper ? matchedPaper.ytUrl : '#';
+
+      const studentAllRecords = students.filter(s => s.name.toLowerCase() === nameQuery && s.studentClass === classQuery);
+
+      resultContainer.innerHTML = `
+        <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
+          <div class="flex justify-between items-center border-b border-white/10 pb-4">
+            <div>
+              <span class="text-xs opacity-70 font-bold uppercase">${student.studentClass} • ${student.city}</span>
+              <h3 class="text-2xl font-black capitalize">${student.name}</h3>
+              <p class="text-xs text-amber-400 font-bold mt-0.5">${student.paperTitle || "Model Paper 1 - ICT"}</p>
+            </div>
+            <div class="px-4 py-2 rounded-2xl bg-white/10 border border-white/30 font-black text-xl">
+              Grade ${gradeLetter}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4 text-center">
+            <div class="bg-black/40 p-4 rounded-2xl border border-white/10">
+              <p class="text-[10px] opacity-70 font-bold uppercase">Marks</p>
+              <p class="text-2xl font-black mt-1">${student.marks}</p>
+            </div>
+            <div class="bg-black/40 p-4 rounded-2xl border border-white/10">
+              <p class="text-[10px] opacity-70 font-bold uppercase">City Rank</p>
+              <p class="text-2xl font-black mt-1">#${cityRank}</p>
+            </div>
+            <div class="bg-black/40 p-4 rounded-2xl border border-white/10">
+              <p class="text-[10px] opacity-70 font-bold uppercase">Paper Rank</p>
+              <p class="text-2xl font-black mt-1">#${paperRank}</p>
+            </div>
+          </div>
+
+          <!-- Student Progress Chart Section -->
+          <div class="pt-4 border-t border-white/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-black uppercase tracking-widest text-amber-400 flex items-center gap-2">
+                <i class="fa-solid fa-chart-line"></i> Student Progress Chart (ප්‍රගති ප්‍රස්ථාරය)
+              </h4>
+            </div>
+            <div class="bg-black/50 p-4 rounded-2xl border border-white/10 relative h-64">
+              <canvas id="studentProgressChart"></canvas>
+            </div>
+          </div>
+
+          ${ytLink && ytLink !== '#' ? `
+            <div class="pt-2">
+              <a href="${ytLink}" target="_blank" class="w-full py-3.5 rounded-2xl bg-red-600/20 border border-red-500/50 hover:bg-red-600/30 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition">
+                <i class="fa-brands fa-youtube text-red-500 text-base"></i> Watch Paper Discussion Recording
+              </a>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      renderProgressChart(studentAllRecords);
+    }
+
+    function renderProgressChart(records) {
+      const ctx = document.getElementById('studentProgressChart').getContext('2d');
+      
+      if (studentProgressChartInstance) {
+        studentProgressChartInstance.destroy();
+      }
+
+      const labels = records.map(r => r.paperTitle || "Model Paper");
+      const dataPoints = records.map(r => r.marks);
+
+      studentProgressChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Marks Progress',
+            data: dataPoints,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderWidth: 3,
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#3b82f6',
+            pointRadius: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              grid: { color: 'rgba(255, 255, 255, 0.1)' },
+              ticks: { color: '#a3a3a3', font: { size: 10 } }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#a3a3a3', font: { size: 10 } }
+            }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    function handleAddStudent(e) {
+      e.preventDefault();
+      const name = document.getElementById('admin-name').value.trim();
+      const studentClass = document.getElementById('admin-class').value;
+      const city = document.getElementById('admin-city').value;
+      const paperTitle = document.getElementById('admin-paper-title').value;
+      const marks = parseInt(document.getElementById('admin-marks').value);
+
+      students.push({ id: Date.now(), name, studentClass, city, paperTitle, marks });
+      localStorage.setItem('student_records', JSON.stringify(students));
+
+      document.getElementById('admin-name').value = '';
+      document.getElementById('admin-marks').value = '';
+      renderAdminTable();
+      alert('ශිෂ්‍යයා සාර්ථකව එකතු කළා!');
+    }
+
+    function deleteStudent(id) {
+      if (confirm('මෙම ශිෂ්‍ය වාර්තාව ඉවත් කිරීමට අවශ්‍යද?')) {
+        students = students.filter(s => s.id !== id);
+        localStorage.setItem('student_records', JSON.stringify(students));
+        renderAdminTable();
+      }
+    }
+
+    function renderAdminTable() {
+      const tbody = document.getElementById('admin-table-body');
+      const filterClass = document.getElementById('filter-class').value;
+      const filterPaper = document.getElementById('filter-paper').value;
+      
+      let filtered = students.sort((a, b) => b.marks - a.marks);
+      if (filterClass !== 'ALL') {
+        filtered = filtered.filter(s => s.studentClass === filterClass);
+      }
+      if (filterPaper !== 'ALL') {
+        filtered = filtered.filter(s => (s.paperTitle || "Model Paper 1 - ICT") === filterPaper);
+      }
+
+      document.getElementById('total-count-badge').innerText = `Total: ${filtered.length}`;
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-xs opacity-60">No records found.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach((s, idx) => {
+        const gradeLetter = s.marks >= 75 ? 'A' : s.marks >= 65 ? 'B' : s.marks >= 50 ? 'C' : 'S';
+        const rankDisplay = idx === 0 ? '<span class="text-amber-400 font-bold"><i class="fa-solid fa-crown"></i> #1</span>' : `#${idx + 1}`;
+        
+        tbody.innerHTML += `
+          <tr class="border-b border-white/5 hover:bg-white/5 transition">
+            <td class="py-3 px-2 font-bold">${rankDisplay}</td>
+            <td class="py-3 px-2 capitalize font-semibold">${s.name}</td>
+            <td class="py-3 px-2 text-xs text-amber-300 font-semibold">${s.paperTitle || "Model Paper 1 - ICT"}</td>
+            <td class="py-3 px-2 text-xs opacity-80"><span class="px-2 py-1 bg-white/10 rounded-lg">${s.studentClass}</span></td>
+            <td class="py-3 px-2 text-xs opacity-80 capitalize">${s.city}</td>
+            <td class="py-3 px-2 font-bold text-amber-300">${s.marks}</td>
+            <td class="py-3 px-2"><span class="px-2.5 py-0.5 rounded-lg bg-white/10 text-xs font-black">${gradeLetter}</span></td>
+            <td class="py-3 px-2 text-center">
+              <button onclick="deleteStudent(${s.id})" class="w-8 h-8 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition mx-auto">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>
